@@ -31,13 +31,15 @@ func main() {
 	oldMetricsParser := textparse.NewPromParser(oldMetricsBytes)
 	newMetricsParser := textparse.NewPromParser(newMetricsBytes)
 
-	fmt.Printf("old metrics : \n")
 	oldMetrics := parseMetrics(oldMetricsParser)
-	fmt.Println(oldMetrics)
-
-	fmt.Printf("\n\n\nnew metrics : \n")
 	newMetrics := parseMetrics(newMetricsParser)
-	fmt.Println(newMetrics)
+
+	metricsDiff := oldMetrics.Diff(newMetrics)
+
+	fmt.Printf("Metrics Diff: \n\n")
+	for _, metric := range metricsDiff {
+		fmt.Println(metric)
+	}
 }
 
 // Metric represents a prometheus metric
@@ -74,6 +76,22 @@ func (metrics Metrics) AddMetric(metricName string) {
 			Name: metricName,
 		}
 	}
+}
+
+// Diff finds the difference between the two metrics.
+// What this means is that, what metric is present in
+// metrics but not present in anotherMetrics
+func (metrics Metrics) Diff(anotherMetrics Metrics) []string {
+	diff := []string{}
+
+	for metricName := range metrics {
+		_, metricExists := anotherMetrics[metricName]
+		if !metricExists {
+			diff = append(diff, metricName)
+		}
+	}
+
+	return diff
 }
 
 func parseMetrics(parser textparse.Parser) Metrics {

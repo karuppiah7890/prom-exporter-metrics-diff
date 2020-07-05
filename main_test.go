@@ -180,3 +180,44 @@ func TestExtractLabelsAndMetricName(t *testing.T) {
 	assert.Equal(t, expectedLabelNames, labelNames)
 	assert.Equal(t, expectedMetricName, metricName)
 }
+
+func TestMetricsDifference(t *testing.T) {
+	t.Run("NoDiff", func(t *testing.T) {
+		metrics := Metrics{
+			"oneMetric": &Metric{
+				Name: "oneMetric",
+			},
+		}
+
+		anotherMetrics := Metrics{
+			"oneMetric": &Metric{
+				Name: "oneMetric",
+			},
+		}
+
+		metricNamesDiff := metrics.Diff(anotherMetrics)
+
+		assert.Equal(t, []string{}, metricNamesDiff)
+	})
+
+	t.Run("OneMetricNameInDiff", func(t *testing.T) {
+		metrics := Metrics{
+			"oneMetric": &Metric{
+				Name: "oneMetric",
+			},
+			"anotherMetric": &Metric{
+				Name: "anotherMetric",
+			},
+		}
+
+		anotherMetrics := Metrics{
+			"oneMetric": &Metric{
+				Name: "oneMetric",
+			},
+		}
+
+		metricNamesDiff := metrics.Diff(anotherMetrics)
+
+		assert.Equal(t, []string{"anotherMetric"}, metricNamesDiff)
+	})
+}
