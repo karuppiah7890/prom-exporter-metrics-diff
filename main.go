@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/pkg/textparse"
@@ -18,26 +19,65 @@ func main() {
 	}
 	oldMetricsFilePath := os.Args[1]
 	newMetricsFilePath := os.Args[2]
-	oldMetrics, err := ioutil.ReadFile(oldMetricsFilePath)
+	oldMetricsBytes, err := ioutil.ReadFile(oldMetricsFilePath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	newMetrics, err := ioutil.ReadFile(newMetricsFilePath)
+	newMetricsBytes, err := ioutil.ReadFile(newMetricsFilePath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	oldMetricsParser := textparse.NewPromParser(oldMetrics)
-	newMetricsParser := textparse.NewPromParser(newMetrics)
+	oldMetricsParser := textparse.NewPromParser(oldMetricsBytes)
+	newMetricsParser := textparse.NewPromParser(newMetricsBytes)
 
 	fmt.Printf("old metrics : \n")
-	parseMetrics(oldMetricsParser)
+	oldMetrics := parseMetrics(oldMetricsParser)
+	fmt.Println(oldMetrics)
 
 	fmt.Printf("\n\n\nnew metrics : \n")
-	parseMetrics(newMetricsParser)
+	newMetrics := parseMetrics(newMetricsParser)
+	fmt.Println(newMetrics)
 }
 
-func parseMetrics(parser textparse.Parser) {
+// Metric represents a prometheus metric
+type Metric struct {
+	Name   string
+	Type   string
+	Labels []string
+}
+
+// Metrics represents a collection of prometheus metrics
+type Metrics map[string]*Metric
+
+// SetMetricType sets the type of a metric given the metric name.
+// It also creates the metric first if it does not exist
+func (metrics Metrics) SetMetricType(metricName, metricType string) {
+	metrics.AddMetric(metricName)
+	metrics[metricName].Type = metricType
+}
+
+// SetMetricLabels sets the labels of a metric given the metric name.
+// It also creates the metric first if it does not exist
+func (metrics Metrics) SetMetricLabels(metricName string, metricLabels []string) {
+	metrics.AddMetric(metricName)
+	metrics[metricName].Labels = metricLabels
+}
+
+// AddMetric adds metric with the given metric name only
+// if it does not exist. If it exists, it does not
+// modify it
+func (metrics Metrics) AddMetric(metricName string) {
+	_, ok := metrics[metricName]
+	if !ok {
+		metrics[metricName] = &Metric{
+			Name: metricName,
+		}
+	}
+}
+
+func parseMetrics(parser textparse.Parser) Metrics {
+	metrics := Metrics{}
 	for true {
 		entry, err := parser.Next()
 		if err == io.EOF {
@@ -50,13 +90,14 @@ func parseMetrics(parser textparse.Parser) {
 
 		if entry == textparse.EntryType {
 			metricName, metricType := parser.Type()
-			fmt.Printf("Metric Name: %s, Metric Type: %s\n", metricName, metricType)
+			metrics.SetMetricType(string(metricName), string(metricType))
 		}
 
 		if entry == textparse.EntrySeries {
 			var labels labels.Labels
-			metric := parser.Metric(&labels)
-			fmt.Printf("Metric : %s, Metric Labels: %v\n", metric, labels)
+			parser.Metric(&labels)
+			labelNames, metricName := extractLabelsAndMetricName(labels)
+			metrics.SetMetricLabels(metricName, labelNames)
 		}
 
 		if entry == textparse.EntryUnit {
@@ -64,4 +105,30 @@ func parseMetrics(parser textparse.Parser) {
 			fmt.Printf("Metric Name: %s, Metric Unit: %s\n", metricName, metricUnit)
 		}
 	}
+
+	return metrics
+}
+
+func extractLabelsAndMetricName(labels labels.Labels) ([]string, string) {
+	metricName := ""
+	labelNames := make([]string, 0, len(labels)-1)
+	for _, label := range labels {
+		if label.Name == "__name__" {
+			metricName = label.Value
+			continue
+		}
+
+		labelNames = append(labelNames, label.Name)
+	}
+	return labelNames, metricName
+}
+
+func (metrics Metrics) String() string {
+	var completeMetrics strings.Builder
+
+	for _, metric := range metrics {
+		completeMetrics.WriteString(fmt.Sprintf("%s, %s, %v\n", metric.Name, metric.Type, metric.Labels))
+	}
+
+	return completeMetrics.String()
 }
