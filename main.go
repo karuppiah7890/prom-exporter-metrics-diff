@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/pkg/textparse"
 )
 
@@ -50,6 +51,17 @@ func parseMetrics(parser textparse.Parser) {
 		if entry == textparse.EntryType {
 			metricName, metricType := parser.Type()
 			fmt.Printf("Metric Name: %s, Metric Type: %s\n", metricName, metricType)
+		}
+
+		if entry == textparse.EntrySeries {
+			var labels labels.Labels
+			metric := parser.Metric(&labels)
+			fmt.Printf("Metric : %s, Metric Labels: %v\n", metric, labels)
+		}
+
+		if entry == textparse.EntryUnit {
+			metricName, metricUnit := parser.Unit()
+			fmt.Printf("Metric Name: %s, Metric Unit: %s\n", metricName, metricUnit)
 		}
 	}
 }

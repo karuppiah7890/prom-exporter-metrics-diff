@@ -277,3 +277,642 @@ be done manually if you don't have automation. For this step, I'm planning to
 create a separate tool to fix grafana dashboard JSONs given input on what should
 be changed to what.
 
+Next what I did was get the labels - names and values. I checked the code in
+github.com/prometheus/prometheus - pkg/textparse/promparse_test.go and found
+out how to get the labels
+
+```bash
+$ ./prom-exporter-metrics-diff sample/0.15.0.metrics sample/0.18.0.metrics
+old metrics : 
+Metric Name: go_gc_duration_seconds, Metric Type: summary
+Metric : go_gc_duration_seconds{quantile="0"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0"}
+Metric : go_gc_duration_seconds{quantile="0.25"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.25"}
+Metric : go_gc_duration_seconds{quantile="0.5"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.5"}
+Metric : go_gc_duration_seconds{quantile="0.75"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.75"}
+Metric : go_gc_duration_seconds{quantile="1"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="1"}
+Metric : go_gc_duration_seconds_sum, Metric Labels: {__name__="go_gc_duration_seconds_sum"}
+Metric : go_gc_duration_seconds_count, Metric Labels: {__name__="go_gc_duration_seconds_count"}
+Metric Name: go_goroutines, Metric Type: gauge
+Metric : go_goroutines, Metric Labels: {__name__="go_goroutines"}
+Metric Name: go_info, Metric Type: gauge
+Metric : go_info{version="go1.9.1"}, Metric Labels: {__name__="go_info", version="go1.9.1"}
+Metric Name: go_memstats_alloc_bytes, Metric Type: gauge
+Metric : go_memstats_alloc_bytes, Metric Labels: {__name__="go_memstats_alloc_bytes"}
+Metric Name: go_memstats_alloc_bytes_total, Metric Type: counter
+Metric : go_memstats_alloc_bytes_total, Metric Labels: {__name__="go_memstats_alloc_bytes_total"}
+Metric Name: go_memstats_buck_hash_sys_bytes, Metric Type: gauge
+Metric : go_memstats_buck_hash_sys_bytes, Metric Labels: {__name__="go_memstats_buck_hash_sys_bytes"}
+Metric Name: go_memstats_frees_total, Metric Type: counter
+Metric : go_memstats_frees_total, Metric Labels: {__name__="go_memstats_frees_total"}
+Metric Name: go_memstats_gc_cpu_fraction, Metric Type: gauge
+Metric : go_memstats_gc_cpu_fraction, Metric Labels: {__name__="go_memstats_gc_cpu_fraction"}
+Metric Name: go_memstats_gc_sys_bytes, Metric Type: gauge
+Metric : go_memstats_gc_sys_bytes, Metric Labels: {__name__="go_memstats_gc_sys_bytes"}
+Metric Name: go_memstats_heap_alloc_bytes, Metric Type: gauge
+Metric : go_memstats_heap_alloc_bytes, Metric Labels: {__name__="go_memstats_heap_alloc_bytes"}
+Metric Name: go_memstats_heap_idle_bytes, Metric Type: gauge
+Metric : go_memstats_heap_idle_bytes, Metric Labels: {__name__="go_memstats_heap_idle_bytes"}
+Metric Name: go_memstats_heap_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_heap_inuse_bytes, Metric Labels: {__name__="go_memstats_heap_inuse_bytes"}
+Metric Name: go_memstats_heap_objects, Metric Type: gauge
+Metric : go_memstats_heap_objects, Metric Labels: {__name__="go_memstats_heap_objects"}
+Metric Name: go_memstats_heap_released_bytes, Metric Type: gauge
+Metric : go_memstats_heap_released_bytes, Metric Labels: {__name__="go_memstats_heap_released_bytes"}
+Metric Name: go_memstats_heap_sys_bytes, Metric Type: gauge
+Metric : go_memstats_heap_sys_bytes, Metric Labels: {__name__="go_memstats_heap_sys_bytes"}
+Metric Name: go_memstats_last_gc_time_seconds, Metric Type: gauge
+Metric : go_memstats_last_gc_time_seconds, Metric Labels: {__name__="go_memstats_last_gc_time_seconds"}
+Metric Name: go_memstats_lookups_total, Metric Type: counter
+Metric : go_memstats_lookups_total, Metric Labels: {__name__="go_memstats_lookups_total"}
+Metric Name: go_memstats_mallocs_total, Metric Type: counter
+Metric : go_memstats_mallocs_total, Metric Labels: {__name__="go_memstats_mallocs_total"}
+Metric Name: go_memstats_mcache_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_mcache_inuse_bytes, Metric Labels: {__name__="go_memstats_mcache_inuse_bytes"}
+Metric Name: go_memstats_mcache_sys_bytes, Metric Type: gauge
+Metric : go_memstats_mcache_sys_bytes, Metric Labels: {__name__="go_memstats_mcache_sys_bytes"}
+Metric Name: go_memstats_mspan_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_mspan_inuse_bytes, Metric Labels: {__name__="go_memstats_mspan_inuse_bytes"}
+Metric Name: go_memstats_mspan_sys_bytes, Metric Type: gauge
+Metric : go_memstats_mspan_sys_bytes, Metric Labels: {__name__="go_memstats_mspan_sys_bytes"}
+Metric Name: go_memstats_next_gc_bytes, Metric Type: gauge
+Metric : go_memstats_next_gc_bytes, Metric Labels: {__name__="go_memstats_next_gc_bytes"}
+Metric Name: go_memstats_other_sys_bytes, Metric Type: gauge
+Metric : go_memstats_other_sys_bytes, Metric Labels: {__name__="go_memstats_other_sys_bytes"}
+Metric Name: go_memstats_stack_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_stack_inuse_bytes, Metric Labels: {__name__="go_memstats_stack_inuse_bytes"}
+Metric Name: go_memstats_stack_sys_bytes, Metric Type: gauge
+Metric : go_memstats_stack_sys_bytes, Metric Labels: {__name__="go_memstats_stack_sys_bytes"}
+Metric Name: go_memstats_sys_bytes, Metric Type: gauge
+Metric : go_memstats_sys_bytes, Metric Labels: {__name__="go_memstats_sys_bytes"}
+Metric Name: go_threads, Metric Type: gauge
+Metric : go_threads, Metric Labels: {__name__="go_threads"}
+Metric Name: http_request_duration_microseconds, Metric Type: summary
+Metric : http_request_duration_microseconds{handler="prometheus",quantile="0.5"}, Metric Labels: {__name__="http_request_duration_microseconds", handler="prometheus", quantile="0.5"}
+Metric : http_request_duration_microseconds{handler="prometheus",quantile="0.9"}, Metric Labels: {__name__="http_request_duration_microseconds", handler="prometheus", quantile="0.9"}
+Metric : http_request_duration_microseconds{handler="prometheus",quantile="0.99"}, Metric Labels: {__name__="http_request_duration_microseconds", handler="prometheus", quantile="0.99"}
+Metric : http_request_duration_microseconds_sum{handler="prometheus"}, Metric Labels: {__name__="http_request_duration_microseconds_sum", handler="prometheus"}
+Metric : http_request_duration_microseconds_count{handler="prometheus"}, Metric Labels: {__name__="http_request_duration_microseconds_count", handler="prometheus"}
+Metric Name: http_request_size_bytes, Metric Type: summary
+Metric : http_request_size_bytes{handler="prometheus",quantile="0.5"}, Metric Labels: {__name__="http_request_size_bytes", handler="prometheus", quantile="0.5"}
+Metric : http_request_size_bytes{handler="prometheus",quantile="0.9"}, Metric Labels: {__name__="http_request_size_bytes", handler="prometheus", quantile="0.9"}
+Metric : http_request_size_bytes{handler="prometheus",quantile="0.99"}, Metric Labels: {__name__="http_request_size_bytes", handler="prometheus", quantile="0.99"}
+Metric : http_request_size_bytes_sum{handler="prometheus"}, Metric Labels: {__name__="http_request_size_bytes_sum", handler="prometheus"}
+Metric : http_request_size_bytes_count{handler="prometheus"}, Metric Labels: {__name__="http_request_size_bytes_count", handler="prometheus"}
+Metric Name: http_requests_total, Metric Type: counter
+Metric : http_requests_total{code="200",handler="prometheus",method="get"}, Metric Labels: {__name__="http_requests_total", code="200", handler="prometheus", method="get"}
+Metric Name: http_response_size_bytes, Metric Type: summary
+Metric : http_response_size_bytes{handler="prometheus",quantile="0.5"}, Metric Labels: {__name__="http_response_size_bytes", handler="prometheus", quantile="0.5"}
+Metric : http_response_size_bytes{handler="prometheus",quantile="0.9"}, Metric Labels: {__name__="http_response_size_bytes", handler="prometheus", quantile="0.9"}
+Metric : http_response_size_bytes{handler="prometheus",quantile="0.99"}, Metric Labels: {__name__="http_response_size_bytes", handler="prometheus", quantile="0.99"}
+Metric : http_response_size_bytes_sum{handler="prometheus"}, Metric Labels: {__name__="http_response_size_bytes_sum", handler="prometheus"}
+Metric : http_response_size_bytes_count{handler="prometheus"}, Metric Labels: {__name__="http_response_size_bytes_count", handler="prometheus"}
+Metric Name: node_cpu, Metric Type: counter
+Metric : node_cpu{cpu="cpu0",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu0", mode="idle"}
+Metric : node_cpu{cpu="cpu0",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu0", mode="nice"}
+Metric : node_cpu{cpu="cpu0",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu0", mode="system"}
+Metric : node_cpu{cpu="cpu0",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu0", mode="user"}
+Metric : node_cpu{cpu="cpu1",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu1", mode="idle"}
+Metric : node_cpu{cpu="cpu1",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu1", mode="nice"}
+Metric : node_cpu{cpu="cpu1",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu1", mode="system"}
+Metric : node_cpu{cpu="cpu1",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu1", mode="user"}
+Metric : node_cpu{cpu="cpu2",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu2", mode="idle"}
+Metric : node_cpu{cpu="cpu2",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu2", mode="nice"}
+Metric : node_cpu{cpu="cpu2",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu2", mode="system"}
+Metric : node_cpu{cpu="cpu2",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu2", mode="user"}
+Metric : node_cpu{cpu="cpu3",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu3", mode="idle"}
+Metric : node_cpu{cpu="cpu3",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu3", mode="nice"}
+Metric : node_cpu{cpu="cpu3",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu3", mode="system"}
+Metric : node_cpu{cpu="cpu3",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu3", mode="user"}
+Metric : node_cpu{cpu="cpu4",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu4", mode="idle"}
+Metric : node_cpu{cpu="cpu4",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu4", mode="nice"}
+Metric : node_cpu{cpu="cpu4",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu4", mode="system"}
+Metric : node_cpu{cpu="cpu4",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu4", mode="user"}
+Metric : node_cpu{cpu="cpu5",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu5", mode="idle"}
+Metric : node_cpu{cpu="cpu5",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu5", mode="nice"}
+Metric : node_cpu{cpu="cpu5",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu5", mode="system"}
+Metric : node_cpu{cpu="cpu5",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu5", mode="user"}
+Metric : node_cpu{cpu="cpu6",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu6", mode="idle"}
+Metric : node_cpu{cpu="cpu6",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu6", mode="nice"}
+Metric : node_cpu{cpu="cpu6",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu6", mode="system"}
+Metric : node_cpu{cpu="cpu6",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu6", mode="user"}
+Metric : node_cpu{cpu="cpu7",mode="idle"}, Metric Labels: {__name__="node_cpu", cpu="cpu7", mode="idle"}
+Metric : node_cpu{cpu="cpu7",mode="nice"}, Metric Labels: {__name__="node_cpu", cpu="cpu7", mode="nice"}
+Metric : node_cpu{cpu="cpu7",mode="system"}, Metric Labels: {__name__="node_cpu", cpu="cpu7", mode="system"}
+Metric : node_cpu{cpu="cpu7",mode="user"}, Metric Labels: {__name__="node_cpu", cpu="cpu7", mode="user"}
+Metric Name: node_disk_read_bytes_total, Metric Type: counter
+Metric : node_disk_read_bytes_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_bytes_total", device="disk0"}
+Metric Name: node_disk_read_seconds_total, Metric Type: counter
+Metric : node_disk_read_seconds_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_seconds_total", device="disk0"}
+Metric Name: node_disk_read_sectors_total, Metric Type: counter
+Metric : node_disk_read_sectors_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_sectors_total", device="disk0"}
+Metric Name: node_disk_reads_completed_total, Metric Type: counter
+Metric : node_disk_reads_completed_total{device="disk0"}, Metric Labels: {__name__="node_disk_reads_completed_total", device="disk0"}
+Metric Name: node_disk_write_seconds_total, Metric Type: counter
+Metric : node_disk_write_seconds_total{device="disk0"}, Metric Labels: {__name__="node_disk_write_seconds_total", device="disk0"}
+Metric Name: node_disk_writes_completed_total, Metric Type: counter
+Metric : node_disk_writes_completed_total{device="disk0"}, Metric Labels: {__name__="node_disk_writes_completed_total", device="disk0"}
+Metric Name: node_disk_written_bytes_total, Metric Type: counter
+Metric : node_disk_written_bytes_total{device="disk0"}, Metric Labels: {__name__="node_disk_written_bytes_total", device="disk0"}
+Metric Name: node_disk_written_sectors_total, Metric Type: counter
+Metric : node_disk_written_sectors_total{device="disk0"}, Metric Labels: {__name__="node_disk_written_sectors_total", device="disk0"}
+Metric Name: node_exporter_build_info, Metric Type: gauge
+Metric : node_exporter_build_info{branch="HEAD",goversion="go1.9.1",revision="6e2053c557f96efb63aef3691f15335a70baaffd",version="0.15.0"}, Metric Labels: {__name__="node_exporter_build_info", branch="HEAD", goversion="go1.9.1", revision="6e2053c557f96efb63aef3691f15335a70baaffd", version="0.15.0"}
+Metric Name: node_filesystem_avail, Metric Type: gauge
+Metric : node_filesystem_avail{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_avail", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_avail{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_avail", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_avail{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_avail", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_avail{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_avail", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_device_error, Metric Type: gauge
+Metric : node_filesystem_device_error{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_device_error{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_device_error{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_device_error{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_device_error", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_files, Metric Type: gauge
+Metric : node_filesystem_files{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_files{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_files{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_files{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_files", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_files_free, Metric Type: gauge
+Metric : node_filesystem_files_free{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_files_free{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_files_free{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_files_free{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_files_free", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_free, Metric Type: gauge
+Metric : node_filesystem_free{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_free", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_free{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_free", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_free{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_free", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_free{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_free", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_readonly, Metric Type: gauge
+Metric : node_filesystem_readonly{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_readonly{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_readonly{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_readonly{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_readonly", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_size, Metric Type: gauge
+Metric : node_filesystem_size{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_size", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_size{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_size", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_size{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_size", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_size{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_size", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_load1, Metric Type: gauge
+Metric : node_load1, Metric Labels: {__name__="node_load1"}
+Metric Name: node_load15, Metric Type: gauge
+Metric : node_load15, Metric Labels: {__name__="node_load15"}
+Metric Name: node_load5, Metric Type: gauge
+Metric : node_load5, Metric Labels: {__name__="node_load5"}
+Metric Name: node_memory_active_bytes_total, Metric Type: gauge
+Metric : node_memory_active_bytes_total, Metric Labels: {__name__="node_memory_active_bytes_total"}
+Metric Name: node_memory_bytes_total, Metric Type: gauge
+Metric : node_memory_bytes_total, Metric Labels: {__name__="node_memory_bytes_total"}
+Metric Name: node_memory_free_bytes_total, Metric Type: gauge
+Metric : node_memory_free_bytes_total, Metric Labels: {__name__="node_memory_free_bytes_total"}
+Metric Name: node_memory_inactive_bytes_total, Metric Type: gauge
+Metric : node_memory_inactive_bytes_total, Metric Labels: {__name__="node_memory_inactive_bytes_total"}
+Metric Name: node_memory_swapped_in_pages_total, Metric Type: gauge
+Metric : node_memory_swapped_in_pages_total, Metric Labels: {__name__="node_memory_swapped_in_pages_total"}
+Metric Name: node_memory_swapped_out_pages_total, Metric Type: gauge
+Metric : node_memory_swapped_out_pages_total, Metric Labels: {__name__="node_memory_swapped_out_pages_total"}
+Metric Name: node_memory_wired_bytes_total, Metric Type: gauge
+Metric : node_memory_wired_bytes_total, Metric Labels: {__name__="node_memory_wired_bytes_total"}
+Metric Name: node_network_receive_bytes, Metric Type: gauge
+Metric : node_network_receive_bytes{device="awdl0"}, Metric Labels: {__name__="node_network_receive_bytes", device="awdl0"}
+Metric : node_network_receive_bytes{device="bridge0"}, Metric Labels: {__name__="node_network_receive_bytes", device="bridge0"}
+Metric : node_network_receive_bytes{device="en0"}, Metric Labels: {__name__="node_network_receive_bytes", device="en0"}
+Metric : node_network_receive_bytes{device="en1"}, Metric Labels: {__name__="node_network_receive_bytes", device="en1"}
+Metric : node_network_receive_bytes{device="en2"}, Metric Labels: {__name__="node_network_receive_bytes", device="en2"}
+Metric : node_network_receive_bytes{device="gif0"}, Metric Labels: {__name__="node_network_receive_bytes", device="gif0"}
+Metric : node_network_receive_bytes{device="llw0"}, Metric Labels: {__name__="node_network_receive_bytes", device="llw0"}
+Metric : node_network_receive_bytes{device="lo0"}, Metric Labels: {__name__="node_network_receive_bytes", device="lo0"}
+Metric : node_network_receive_bytes{device="p2p0"}, Metric Labels: {__name__="node_network_receive_bytes", device="p2p0"}
+Metric : node_network_receive_bytes{device="stf0"}, Metric Labels: {__name__="node_network_receive_bytes", device="stf0"}
+Metric : node_network_receive_bytes{device="utun0"}, Metric Labels: {__name__="node_network_receive_bytes", device="utun0"}
+Metric : node_network_receive_bytes{device="utun1"}, Metric Labels: {__name__="node_network_receive_bytes", device="utun1"}
+Metric Name: node_network_receive_errs, Metric Type: gauge
+Metric : node_network_receive_errs{device="awdl0"}, Metric Labels: {__name__="node_network_receive_errs", device="awdl0"}
+Metric : node_network_receive_errs{device="bridge0"}, Metric Labels: {__name__="node_network_receive_errs", device="bridge0"}
+Metric : node_network_receive_errs{device="en0"}, Metric Labels: {__name__="node_network_receive_errs", device="en0"}
+Metric : node_network_receive_errs{device="en1"}, Metric Labels: {__name__="node_network_receive_errs", device="en1"}
+Metric : node_network_receive_errs{device="en2"}, Metric Labels: {__name__="node_network_receive_errs", device="en2"}
+Metric : node_network_receive_errs{device="gif0"}, Metric Labels: {__name__="node_network_receive_errs", device="gif0"}
+Metric : node_network_receive_errs{device="llw0"}, Metric Labels: {__name__="node_network_receive_errs", device="llw0"}
+Metric : node_network_receive_errs{device="lo0"}, Metric Labels: {__name__="node_network_receive_errs", device="lo0"}
+Metric : node_network_receive_errs{device="p2p0"}, Metric Labels: {__name__="node_network_receive_errs", device="p2p0"}
+Metric : node_network_receive_errs{device="stf0"}, Metric Labels: {__name__="node_network_receive_errs", device="stf0"}
+Metric : node_network_receive_errs{device="utun0"}, Metric Labels: {__name__="node_network_receive_errs", device="utun0"}
+Metric : node_network_receive_errs{device="utun1"}, Metric Labels: {__name__="node_network_receive_errs", device="utun1"}
+Metric Name: node_network_receive_multicast, Metric Type: gauge
+Metric : node_network_receive_multicast{device="awdl0"}, Metric Labels: {__name__="node_network_receive_multicast", device="awdl0"}
+Metric : node_network_receive_multicast{device="bridge0"}, Metric Labels: {__name__="node_network_receive_multicast", device="bridge0"}
+Metric : node_network_receive_multicast{device="en0"}, Metric Labels: {__name__="node_network_receive_multicast", device="en0"}
+Metric : node_network_receive_multicast{device="en1"}, Metric Labels: {__name__="node_network_receive_multicast", device="en1"}
+Metric : node_network_receive_multicast{device="en2"}, Metric Labels: {__name__="node_network_receive_multicast", device="en2"}
+Metric : node_network_receive_multicast{device="gif0"}, Metric Labels: {__name__="node_network_receive_multicast", device="gif0"}
+Metric : node_network_receive_multicast{device="llw0"}, Metric Labels: {__name__="node_network_receive_multicast", device="llw0"}
+Metric : node_network_receive_multicast{device="lo0"}, Metric Labels: {__name__="node_network_receive_multicast", device="lo0"}
+Metric : node_network_receive_multicast{device="p2p0"}, Metric Labels: {__name__="node_network_receive_multicast", device="p2p0"}
+Metric : node_network_receive_multicast{device="stf0"}, Metric Labels: {__name__="node_network_receive_multicast", device="stf0"}
+Metric : node_network_receive_multicast{device="utun0"}, Metric Labels: {__name__="node_network_receive_multicast", device="utun0"}
+Metric : node_network_receive_multicast{device="utun1"}, Metric Labels: {__name__="node_network_receive_multicast", device="utun1"}
+Metric Name: node_network_receive_packets, Metric Type: gauge
+Metric : node_network_receive_packets{device="awdl0"}, Metric Labels: {__name__="node_network_receive_packets", device="awdl0"}
+Metric : node_network_receive_packets{device="bridge0"}, Metric Labels: {__name__="node_network_receive_packets", device="bridge0"}
+Metric : node_network_receive_packets{device="en0"}, Metric Labels: {__name__="node_network_receive_packets", device="en0"}
+Metric : node_network_receive_packets{device="en1"}, Metric Labels: {__name__="node_network_receive_packets", device="en1"}
+Metric : node_network_receive_packets{device="en2"}, Metric Labels: {__name__="node_network_receive_packets", device="en2"}
+Metric : node_network_receive_packets{device="gif0"}, Metric Labels: {__name__="node_network_receive_packets", device="gif0"}
+Metric : node_network_receive_packets{device="llw0"}, Metric Labels: {__name__="node_network_receive_packets", device="llw0"}
+Metric : node_network_receive_packets{device="lo0"}, Metric Labels: {__name__="node_network_receive_packets", device="lo0"}
+Metric : node_network_receive_packets{device="p2p0"}, Metric Labels: {__name__="node_network_receive_packets", device="p2p0"}
+Metric : node_network_receive_packets{device="stf0"}, Metric Labels: {__name__="node_network_receive_packets", device="stf0"}
+Metric : node_network_receive_packets{device="utun0"}, Metric Labels: {__name__="node_network_receive_packets", device="utun0"}
+Metric : node_network_receive_packets{device="utun1"}, Metric Labels: {__name__="node_network_receive_packets", device="utun1"}
+Metric Name: node_network_transmit_bytes, Metric Type: gauge
+Metric : node_network_transmit_bytes{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="awdl0"}
+Metric : node_network_transmit_bytes{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="bridge0"}
+Metric : node_network_transmit_bytes{device="en0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="en0"}
+Metric : node_network_transmit_bytes{device="en1"}, Metric Labels: {__name__="node_network_transmit_bytes", device="en1"}
+Metric : node_network_transmit_bytes{device="en2"}, Metric Labels: {__name__="node_network_transmit_bytes", device="en2"}
+Metric : node_network_transmit_bytes{device="gif0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="gif0"}
+Metric : node_network_transmit_bytes{device="llw0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="llw0"}
+Metric : node_network_transmit_bytes{device="lo0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="lo0"}
+Metric : node_network_transmit_bytes{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="p2p0"}
+Metric : node_network_transmit_bytes{device="stf0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="stf0"}
+Metric : node_network_transmit_bytes{device="utun0"}, Metric Labels: {__name__="node_network_transmit_bytes", device="utun0"}
+Metric : node_network_transmit_bytes{device="utun1"}, Metric Labels: {__name__="node_network_transmit_bytes", device="utun1"}
+Metric Name: node_network_transmit_errs, Metric Type: gauge
+Metric : node_network_transmit_errs{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_errs", device="awdl0"}
+Metric : node_network_transmit_errs{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_errs", device="bridge0"}
+Metric : node_network_transmit_errs{device="en0"}, Metric Labels: {__name__="node_network_transmit_errs", device="en0"}
+Metric : node_network_transmit_errs{device="en1"}, Metric Labels: {__name__="node_network_transmit_errs", device="en1"}
+Metric : node_network_transmit_errs{device="en2"}, Metric Labels: {__name__="node_network_transmit_errs", device="en2"}
+Metric : node_network_transmit_errs{device="gif0"}, Metric Labels: {__name__="node_network_transmit_errs", device="gif0"}
+Metric : node_network_transmit_errs{device="llw0"}, Metric Labels: {__name__="node_network_transmit_errs", device="llw0"}
+Metric : node_network_transmit_errs{device="lo0"}, Metric Labels: {__name__="node_network_transmit_errs", device="lo0"}
+Metric : node_network_transmit_errs{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_errs", device="p2p0"}
+Metric : node_network_transmit_errs{device="stf0"}, Metric Labels: {__name__="node_network_transmit_errs", device="stf0"}
+Metric : node_network_transmit_errs{device="utun0"}, Metric Labels: {__name__="node_network_transmit_errs", device="utun0"}
+Metric : node_network_transmit_errs{device="utun1"}, Metric Labels: {__name__="node_network_transmit_errs", device="utun1"}
+Metric Name: node_network_transmit_multicast, Metric Type: gauge
+Metric : node_network_transmit_multicast{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="awdl0"}
+Metric : node_network_transmit_multicast{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="bridge0"}
+Metric : node_network_transmit_multicast{device="en0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="en0"}
+Metric : node_network_transmit_multicast{device="en1"}, Metric Labels: {__name__="node_network_transmit_multicast", device="en1"}
+Metric : node_network_transmit_multicast{device="en2"}, Metric Labels: {__name__="node_network_transmit_multicast", device="en2"}
+Metric : node_network_transmit_multicast{device="gif0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="gif0"}
+Metric : node_network_transmit_multicast{device="llw0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="llw0"}
+Metric : node_network_transmit_multicast{device="lo0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="lo0"}
+Metric : node_network_transmit_multicast{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="p2p0"}
+Metric : node_network_transmit_multicast{device="stf0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="stf0"}
+Metric : node_network_transmit_multicast{device="utun0"}, Metric Labels: {__name__="node_network_transmit_multicast", device="utun0"}
+Metric : node_network_transmit_multicast{device="utun1"}, Metric Labels: {__name__="node_network_transmit_multicast", device="utun1"}
+Metric Name: node_network_transmit_packets, Metric Type: gauge
+Metric : node_network_transmit_packets{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_packets", device="awdl0"}
+Metric : node_network_transmit_packets{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_packets", device="bridge0"}
+Metric : node_network_transmit_packets{device="en0"}, Metric Labels: {__name__="node_network_transmit_packets", device="en0"}
+Metric : node_network_transmit_packets{device="en1"}, Metric Labels: {__name__="node_network_transmit_packets", device="en1"}
+Metric : node_network_transmit_packets{device="en2"}, Metric Labels: {__name__="node_network_transmit_packets", device="en2"}
+Metric : node_network_transmit_packets{device="gif0"}, Metric Labels: {__name__="node_network_transmit_packets", device="gif0"}
+Metric : node_network_transmit_packets{device="llw0"}, Metric Labels: {__name__="node_network_transmit_packets", device="llw0"}
+Metric : node_network_transmit_packets{device="lo0"}, Metric Labels: {__name__="node_network_transmit_packets", device="lo0"}
+Metric : node_network_transmit_packets{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_packets", device="p2p0"}
+Metric : node_network_transmit_packets{device="stf0"}, Metric Labels: {__name__="node_network_transmit_packets", device="stf0"}
+Metric : node_network_transmit_packets{device="utun0"}, Metric Labels: {__name__="node_network_transmit_packets", device="utun0"}
+Metric : node_network_transmit_packets{device="utun1"}, Metric Labels: {__name__="node_network_transmit_packets", device="utun1"}
+Metric Name: node_scrape_collector_duration_seconds, Metric Type: gauge
+Metric : node_scrape_collector_duration_seconds{collector="cpu"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="cpu"}
+Metric : node_scrape_collector_duration_seconds{collector="diskstats"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="diskstats"}
+Metric : node_scrape_collector_duration_seconds{collector="filesystem"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="filesystem"}
+Metric : node_scrape_collector_duration_seconds{collector="loadavg"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="loadavg"}
+Metric : node_scrape_collector_duration_seconds{collector="meminfo"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="meminfo"}
+Metric : node_scrape_collector_duration_seconds{collector="netdev"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="netdev"}
+Metric : node_scrape_collector_duration_seconds{collector="textfile"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="textfile"}
+Metric : node_scrape_collector_duration_seconds{collector="time"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="time"}
+Metric Name: node_scrape_collector_success, Metric Type: gauge
+Metric : node_scrape_collector_success{collector="cpu"}, Metric Labels: {__name__="node_scrape_collector_success", collector="cpu"}
+Metric : node_scrape_collector_success{collector="diskstats"}, Metric Labels: {__name__="node_scrape_collector_success", collector="diskstats"}
+Metric : node_scrape_collector_success{collector="filesystem"}, Metric Labels: {__name__="node_scrape_collector_success", collector="filesystem"}
+Metric : node_scrape_collector_success{collector="loadavg"}, Metric Labels: {__name__="node_scrape_collector_success", collector="loadavg"}
+Metric : node_scrape_collector_success{collector="meminfo"}, Metric Labels: {__name__="node_scrape_collector_success", collector="meminfo"}
+Metric : node_scrape_collector_success{collector="netdev"}, Metric Labels: {__name__="node_scrape_collector_success", collector="netdev"}
+Metric : node_scrape_collector_success{collector="textfile"}, Metric Labels: {__name__="node_scrape_collector_success", collector="textfile"}
+Metric : node_scrape_collector_success{collector="time"}, Metric Labels: {__name__="node_scrape_collector_success", collector="time"}
+Metric Name: node_time, Metric Type: gauge
+Metric : node_time, Metric Labels: {__name__="node_time"}
+
+
+
+new metrics : 
+Metric Name: go_gc_duration_seconds, Metric Type: summary
+Metric : go_gc_duration_seconds{quantile="0"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0"}
+Metric : go_gc_duration_seconds{quantile="0.25"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.25"}
+Metric : go_gc_duration_seconds{quantile="0.5"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.5"}
+Metric : go_gc_duration_seconds{quantile="0.75"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="0.75"}
+Metric : go_gc_duration_seconds{quantile="1"}, Metric Labels: {__name__="go_gc_duration_seconds", quantile="1"}
+Metric : go_gc_duration_seconds_sum, Metric Labels: {__name__="go_gc_duration_seconds_sum"}
+Metric : go_gc_duration_seconds_count, Metric Labels: {__name__="go_gc_duration_seconds_count"}
+Metric Name: go_goroutines, Metric Type: gauge
+Metric : go_goroutines, Metric Labels: {__name__="go_goroutines"}
+Metric Name: go_info, Metric Type: gauge
+Metric : go_info{version="go1.11.10"}, Metric Labels: {__name__="go_info", version="go1.11.10"}
+Metric Name: go_memstats_alloc_bytes, Metric Type: gauge
+Metric : go_memstats_alloc_bytes, Metric Labels: {__name__="go_memstats_alloc_bytes"}
+Metric Name: go_memstats_alloc_bytes_total, Metric Type: counter
+Metric : go_memstats_alloc_bytes_total, Metric Labels: {__name__="go_memstats_alloc_bytes_total"}
+Metric Name: go_memstats_buck_hash_sys_bytes, Metric Type: gauge
+Metric : go_memstats_buck_hash_sys_bytes, Metric Labels: {__name__="go_memstats_buck_hash_sys_bytes"}
+Metric Name: go_memstats_frees_total, Metric Type: counter
+Metric : go_memstats_frees_total, Metric Labels: {__name__="go_memstats_frees_total"}
+Metric Name: go_memstats_gc_cpu_fraction, Metric Type: gauge
+Metric : go_memstats_gc_cpu_fraction, Metric Labels: {__name__="go_memstats_gc_cpu_fraction"}
+Metric Name: go_memstats_gc_sys_bytes, Metric Type: gauge
+Metric : go_memstats_gc_sys_bytes, Metric Labels: {__name__="go_memstats_gc_sys_bytes"}
+Metric Name: go_memstats_heap_alloc_bytes, Metric Type: gauge
+Metric : go_memstats_heap_alloc_bytes, Metric Labels: {__name__="go_memstats_heap_alloc_bytes"}
+Metric Name: go_memstats_heap_idle_bytes, Metric Type: gauge
+Metric : go_memstats_heap_idle_bytes, Metric Labels: {__name__="go_memstats_heap_idle_bytes"}
+Metric Name: go_memstats_heap_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_heap_inuse_bytes, Metric Labels: {__name__="go_memstats_heap_inuse_bytes"}
+Metric Name: go_memstats_heap_objects, Metric Type: gauge
+Metric : go_memstats_heap_objects, Metric Labels: {__name__="go_memstats_heap_objects"}
+Metric Name: go_memstats_heap_released_bytes, Metric Type: gauge
+Metric : go_memstats_heap_released_bytes, Metric Labels: {__name__="go_memstats_heap_released_bytes"}
+Metric Name: go_memstats_heap_sys_bytes, Metric Type: gauge
+Metric : go_memstats_heap_sys_bytes, Metric Labels: {__name__="go_memstats_heap_sys_bytes"}
+Metric Name: go_memstats_last_gc_time_seconds, Metric Type: gauge
+Metric : go_memstats_last_gc_time_seconds, Metric Labels: {__name__="go_memstats_last_gc_time_seconds"}
+Metric Name: go_memstats_lookups_total, Metric Type: counter
+Metric : go_memstats_lookups_total, Metric Labels: {__name__="go_memstats_lookups_total"}
+Metric Name: go_memstats_mallocs_total, Metric Type: counter
+Metric : go_memstats_mallocs_total, Metric Labels: {__name__="go_memstats_mallocs_total"}
+Metric Name: go_memstats_mcache_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_mcache_inuse_bytes, Metric Labels: {__name__="go_memstats_mcache_inuse_bytes"}
+Metric Name: go_memstats_mcache_sys_bytes, Metric Type: gauge
+Metric : go_memstats_mcache_sys_bytes, Metric Labels: {__name__="go_memstats_mcache_sys_bytes"}
+Metric Name: go_memstats_mspan_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_mspan_inuse_bytes, Metric Labels: {__name__="go_memstats_mspan_inuse_bytes"}
+Metric Name: go_memstats_mspan_sys_bytes, Metric Type: gauge
+Metric : go_memstats_mspan_sys_bytes, Metric Labels: {__name__="go_memstats_mspan_sys_bytes"}
+Metric Name: go_memstats_next_gc_bytes, Metric Type: gauge
+Metric : go_memstats_next_gc_bytes, Metric Labels: {__name__="go_memstats_next_gc_bytes"}
+Metric Name: go_memstats_other_sys_bytes, Metric Type: gauge
+Metric : go_memstats_other_sys_bytes, Metric Labels: {__name__="go_memstats_other_sys_bytes"}
+Metric Name: go_memstats_stack_inuse_bytes, Metric Type: gauge
+Metric : go_memstats_stack_inuse_bytes, Metric Labels: {__name__="go_memstats_stack_inuse_bytes"}
+Metric Name: go_memstats_stack_sys_bytes, Metric Type: gauge
+Metric : go_memstats_stack_sys_bytes, Metric Labels: {__name__="go_memstats_stack_sys_bytes"}
+Metric Name: go_memstats_sys_bytes, Metric Type: gauge
+Metric : go_memstats_sys_bytes, Metric Labels: {__name__="go_memstats_sys_bytes"}
+Metric Name: go_threads, Metric Type: gauge
+Metric : go_threads, Metric Labels: {__name__="go_threads"}
+Metric Name: node_boot_time_seconds, Metric Type: gauge
+Metric : node_boot_time_seconds, Metric Labels: {__name__="node_boot_time_seconds"}
+Metric Name: node_cpu_seconds_total, Metric Type: counter
+Metric : node_cpu_seconds_total{cpu="0",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="0", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="0",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="0", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="0",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="0", mode="system"}
+Metric : node_cpu_seconds_total{cpu="0",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="0", mode="user"}
+Metric : node_cpu_seconds_total{cpu="1",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="1", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="1",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="1", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="1",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="1", mode="system"}
+Metric : node_cpu_seconds_total{cpu="1",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="1", mode="user"}
+Metric : node_cpu_seconds_total{cpu="2",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="2", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="2",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="2", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="2",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="2", mode="system"}
+Metric : node_cpu_seconds_total{cpu="2",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="2", mode="user"}
+Metric : node_cpu_seconds_total{cpu="3",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="3", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="3",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="3", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="3",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="3", mode="system"}
+Metric : node_cpu_seconds_total{cpu="3",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="3", mode="user"}
+Metric : node_cpu_seconds_total{cpu="4",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="4", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="4",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="4", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="4",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="4", mode="system"}
+Metric : node_cpu_seconds_total{cpu="4",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="4", mode="user"}
+Metric : node_cpu_seconds_total{cpu="5",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="5", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="5",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="5", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="5",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="5", mode="system"}
+Metric : node_cpu_seconds_total{cpu="5",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="5", mode="user"}
+Metric : node_cpu_seconds_total{cpu="6",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="6", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="6",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="6", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="6",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="6", mode="system"}
+Metric : node_cpu_seconds_total{cpu="6",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="6", mode="user"}
+Metric : node_cpu_seconds_total{cpu="7",mode="idle"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="7", mode="idle"}
+Metric : node_cpu_seconds_total{cpu="7",mode="nice"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="7", mode="nice"}
+Metric : node_cpu_seconds_total{cpu="7",mode="system"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="7", mode="system"}
+Metric : node_cpu_seconds_total{cpu="7",mode="user"}, Metric Labels: {__name__="node_cpu_seconds_total", cpu="7", mode="user"}
+Metric Name: node_disk_read_bytes_total, Metric Type: counter
+Metric : node_disk_read_bytes_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_bytes_total", device="disk0"}
+Metric Name: node_disk_read_sectors_total, Metric Type: counter
+Metric : node_disk_read_sectors_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_sectors_total", device="disk0"}
+Metric Name: node_disk_read_time_seconds_total, Metric Type: counter
+Metric : node_disk_read_time_seconds_total{device="disk0"}, Metric Labels: {__name__="node_disk_read_time_seconds_total", device="disk0"}
+Metric Name: node_disk_reads_completed_total, Metric Type: counter
+Metric : node_disk_reads_completed_total{device="disk0"}, Metric Labels: {__name__="node_disk_reads_completed_total", device="disk0"}
+Metric Name: node_disk_write_time_seconds_total, Metric Type: counter
+Metric : node_disk_write_time_seconds_total{device="disk0"}, Metric Labels: {__name__="node_disk_write_time_seconds_total", device="disk0"}
+Metric Name: node_disk_writes_completed_total, Metric Type: counter
+Metric : node_disk_writes_completed_total{device="disk0"}, Metric Labels: {__name__="node_disk_writes_completed_total", device="disk0"}
+Metric Name: node_disk_written_bytes_total, Metric Type: counter
+Metric : node_disk_written_bytes_total{device="disk0"}, Metric Labels: {__name__="node_disk_written_bytes_total", device="disk0"}
+Metric Name: node_disk_written_sectors_total, Metric Type: counter
+Metric : node_disk_written_sectors_total{device="disk0"}, Metric Labels: {__name__="node_disk_written_sectors_total", device="disk0"}
+Metric Name: node_exporter_build_info, Metric Type: gauge
+Metric : node_exporter_build_info{branch="HEAD",goversion="go1.11.10",revision="f97f01c46cfde2ff97b5539b7964f3044c04947b",version="0.18.0"}, Metric Labels: {__name__="node_exporter_build_info", branch="HEAD", goversion="go1.11.10", revision="f97f01c46cfde2ff97b5539b7964f3044c04947b", version="0.18.0"}
+Metric Name: node_filesystem_avail_bytes, Metric Type: gauge
+Metric : node_filesystem_avail_bytes{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_avail_bytes", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_avail_bytes{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_avail_bytes", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_avail_bytes{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_avail_bytes", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_avail_bytes{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_avail_bytes", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_device_error, Metric Type: gauge
+Metric : node_filesystem_device_error{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_device_error{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_device_error{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_device_error", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_device_error{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_device_error", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_files, Metric Type: gauge
+Metric : node_filesystem_files{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_files{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_files{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_files", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_files{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_files", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_files_free, Metric Type: gauge
+Metric : node_filesystem_files_free{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_files_free{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_files_free{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_files_free", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_files_free{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_files_free", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_free_bytes, Metric Type: gauge
+Metric : node_filesystem_free_bytes{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_free_bytes", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_free_bytes{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_free_bytes", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_free_bytes{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_free_bytes", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_free_bytes{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_free_bytes", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_readonly, Metric Type: gauge
+Metric : node_filesystem_readonly{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_readonly{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_readonly{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_readonly", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_readonly{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_readonly", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_filesystem_size_bytes, Metric Type: gauge
+Metric : node_filesystem_size_bytes{device="/dev/disk1s1",fstype="apfs",mountpoint="/System/Volumes/Data"}, Metric Labels: {__name__="node_filesystem_size_bytes", device="/dev/disk1s1", fstype="apfs", mountpoint="/System/Volumes/Data"}
+Metric : node_filesystem_size_bytes{device="/dev/disk1s4",fstype="apfs",mountpoint="/private/var/vm"}, Metric Labels: {__name__="node_filesystem_size_bytes", device="/dev/disk1s4", fstype="apfs", mountpoint="/private/var/vm"}
+Metric : node_filesystem_size_bytes{device="/dev/disk1s5",fstype="apfs",mountpoint="/"}, Metric Labels: {__name__="node_filesystem_size_bytes", device="/dev/disk1s5", fstype="apfs", mountpoint="/"}
+Metric : node_filesystem_size_bytes{device="map auto_home",fstype="autofs",mountpoint="/System/Volumes/Data/home"}, Metric Labels: {__name__="node_filesystem_size_bytes", device="map auto_home", fstype="autofs", mountpoint="/System/Volumes/Data/home"}
+Metric Name: node_load1, Metric Type: gauge
+Metric : node_load1, Metric Labels: {__name__="node_load1"}
+Metric Name: node_load15, Metric Type: gauge
+Metric : node_load15, Metric Labels: {__name__="node_load15"}
+Metric Name: node_load5, Metric Type: gauge
+Metric : node_load5, Metric Labels: {__name__="node_load5"}
+Metric Name: node_memory_active_bytes, Metric Type: gauge
+Metric : node_memory_active_bytes, Metric Labels: {__name__="node_memory_active_bytes"}
+Metric Name: node_memory_compressed_bytes, Metric Type: gauge
+Metric : node_memory_compressed_bytes, Metric Labels: {__name__="node_memory_compressed_bytes"}
+Metric Name: node_memory_free_bytes, Metric Type: gauge
+Metric : node_memory_free_bytes, Metric Labels: {__name__="node_memory_free_bytes"}
+Metric Name: node_memory_inactive_bytes, Metric Type: gauge
+Metric : node_memory_inactive_bytes, Metric Labels: {__name__="node_memory_inactive_bytes"}
+Metric Name: node_memory_swapped_in_bytes_total, Metric Type: counter
+Metric : node_memory_swapped_in_bytes_total, Metric Labels: {__name__="node_memory_swapped_in_bytes_total"}
+Metric Name: node_memory_swapped_out_bytes_total, Metric Type: counter
+Metric : node_memory_swapped_out_bytes_total, Metric Labels: {__name__="node_memory_swapped_out_bytes_total"}
+Metric Name: node_memory_total_bytes, Metric Type: gauge
+Metric : node_memory_total_bytes, Metric Labels: {__name__="node_memory_total_bytes"}
+Metric Name: node_memory_wired_bytes, Metric Type: gauge
+Metric : node_memory_wired_bytes, Metric Labels: {__name__="node_memory_wired_bytes"}
+Metric Name: node_network_receive_bytes_total, Metric Type: counter
+Metric : node_network_receive_bytes_total{device="awdl0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="awdl0"}
+Metric : node_network_receive_bytes_total{device="bridge0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="bridge0"}
+Metric : node_network_receive_bytes_total{device="en0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="en0"}
+Metric : node_network_receive_bytes_total{device="en1"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="en1"}
+Metric : node_network_receive_bytes_total{device="en2"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="en2"}
+Metric : node_network_receive_bytes_total{device="gif0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="gif0"}
+Metric : node_network_receive_bytes_total{device="llw0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="llw0"}
+Metric : node_network_receive_bytes_total{device="lo0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="lo0"}
+Metric : node_network_receive_bytes_total{device="p2p0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="p2p0"}
+Metric : node_network_receive_bytes_total{device="stf0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="stf0"}
+Metric : node_network_receive_bytes_total{device="utun0"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="utun0"}
+Metric : node_network_receive_bytes_total{device="utun1"}, Metric Labels: {__name__="node_network_receive_bytes_total", device="utun1"}
+Metric Name: node_network_receive_errs_total, Metric Type: counter
+Metric : node_network_receive_errs_total{device="awdl0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="awdl0"}
+Metric : node_network_receive_errs_total{device="bridge0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="bridge0"}
+Metric : node_network_receive_errs_total{device="en0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="en0"}
+Metric : node_network_receive_errs_total{device="en1"}, Metric Labels: {__name__="node_network_receive_errs_total", device="en1"}
+Metric : node_network_receive_errs_total{device="en2"}, Metric Labels: {__name__="node_network_receive_errs_total", device="en2"}
+Metric : node_network_receive_errs_total{device="gif0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="gif0"}
+Metric : node_network_receive_errs_total{device="llw0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="llw0"}
+Metric : node_network_receive_errs_total{device="lo0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="lo0"}
+Metric : node_network_receive_errs_total{device="p2p0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="p2p0"}
+Metric : node_network_receive_errs_total{device="stf0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="stf0"}
+Metric : node_network_receive_errs_total{device="utun0"}, Metric Labels: {__name__="node_network_receive_errs_total", device="utun0"}
+Metric : node_network_receive_errs_total{device="utun1"}, Metric Labels: {__name__="node_network_receive_errs_total", device="utun1"}
+Metric Name: node_network_receive_multicast_total, Metric Type: counter
+Metric : node_network_receive_multicast_total{device="awdl0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="awdl0"}
+Metric : node_network_receive_multicast_total{device="bridge0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="bridge0"}
+Metric : node_network_receive_multicast_total{device="en0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="en0"}
+Metric : node_network_receive_multicast_total{device="en1"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="en1"}
+Metric : node_network_receive_multicast_total{device="en2"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="en2"}
+Metric : node_network_receive_multicast_total{device="gif0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="gif0"}
+Metric : node_network_receive_multicast_total{device="llw0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="llw0"}
+Metric : node_network_receive_multicast_total{device="lo0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="lo0"}
+Metric : node_network_receive_multicast_total{device="p2p0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="p2p0"}
+Metric : node_network_receive_multicast_total{device="stf0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="stf0"}
+Metric : node_network_receive_multicast_total{device="utun0"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="utun0"}
+Metric : node_network_receive_multicast_total{device="utun1"}, Metric Labels: {__name__="node_network_receive_multicast_total", device="utun1"}
+Metric Name: node_network_receive_packets_total, Metric Type: counter
+Metric : node_network_receive_packets_total{device="awdl0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="awdl0"}
+Metric : node_network_receive_packets_total{device="bridge0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="bridge0"}
+Metric : node_network_receive_packets_total{device="en0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="en0"}
+Metric : node_network_receive_packets_total{device="en1"}, Metric Labels: {__name__="node_network_receive_packets_total", device="en1"}
+Metric : node_network_receive_packets_total{device="en2"}, Metric Labels: {__name__="node_network_receive_packets_total", device="en2"}
+Metric : node_network_receive_packets_total{device="gif0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="gif0"}
+Metric : node_network_receive_packets_total{device="llw0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="llw0"}
+Metric : node_network_receive_packets_total{device="lo0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="lo0"}
+Metric : node_network_receive_packets_total{device="p2p0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="p2p0"}
+Metric : node_network_receive_packets_total{device="stf0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="stf0"}
+Metric : node_network_receive_packets_total{device="utun0"}, Metric Labels: {__name__="node_network_receive_packets_total", device="utun0"}
+Metric : node_network_receive_packets_total{device="utun1"}, Metric Labels: {__name__="node_network_receive_packets_total", device="utun1"}
+Metric Name: node_network_transmit_bytes_total, Metric Type: counter
+Metric : node_network_transmit_bytes_total{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="awdl0"}
+Metric : node_network_transmit_bytes_total{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="bridge0"}
+Metric : node_network_transmit_bytes_total{device="en0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="en0"}
+Metric : node_network_transmit_bytes_total{device="en1"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="en1"}
+Metric : node_network_transmit_bytes_total{device="en2"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="en2"}
+Metric : node_network_transmit_bytes_total{device="gif0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="gif0"}
+Metric : node_network_transmit_bytes_total{device="llw0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="llw0"}
+Metric : node_network_transmit_bytes_total{device="lo0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="lo0"}
+Metric : node_network_transmit_bytes_total{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="p2p0"}
+Metric : node_network_transmit_bytes_total{device="stf0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="stf0"}
+Metric : node_network_transmit_bytes_total{device="utun0"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="utun0"}
+Metric : node_network_transmit_bytes_total{device="utun1"}, Metric Labels: {__name__="node_network_transmit_bytes_total", device="utun1"}
+Metric Name: node_network_transmit_errs_total, Metric Type: counter
+Metric : node_network_transmit_errs_total{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="awdl0"}
+Metric : node_network_transmit_errs_total{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="bridge0"}
+Metric : node_network_transmit_errs_total{device="en0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="en0"}
+Metric : node_network_transmit_errs_total{device="en1"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="en1"}
+Metric : node_network_transmit_errs_total{device="en2"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="en2"}
+Metric : node_network_transmit_errs_total{device="gif0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="gif0"}
+Metric : node_network_transmit_errs_total{device="llw0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="llw0"}
+Metric : node_network_transmit_errs_total{device="lo0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="lo0"}
+Metric : node_network_transmit_errs_total{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="p2p0"}
+Metric : node_network_transmit_errs_total{device="stf0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="stf0"}
+Metric : node_network_transmit_errs_total{device="utun0"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="utun0"}
+Metric : node_network_transmit_errs_total{device="utun1"}, Metric Labels: {__name__="node_network_transmit_errs_total", device="utun1"}
+Metric Name: node_network_transmit_multicast_total, Metric Type: counter
+Metric : node_network_transmit_multicast_total{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="awdl0"}
+Metric : node_network_transmit_multicast_total{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="bridge0"}
+Metric : node_network_transmit_multicast_total{device="en0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="en0"}
+Metric : node_network_transmit_multicast_total{device="en1"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="en1"}
+Metric : node_network_transmit_multicast_total{device="en2"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="en2"}
+Metric : node_network_transmit_multicast_total{device="gif0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="gif0"}
+Metric : node_network_transmit_multicast_total{device="llw0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="llw0"}
+Metric : node_network_transmit_multicast_total{device="lo0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="lo0"}
+Metric : node_network_transmit_multicast_total{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="p2p0"}
+Metric : node_network_transmit_multicast_total{device="stf0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="stf0"}
+Metric : node_network_transmit_multicast_total{device="utun0"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="utun0"}
+Metric : node_network_transmit_multicast_total{device="utun1"}, Metric Labels: {__name__="node_network_transmit_multicast_total", device="utun1"}
+Metric Name: node_network_transmit_packets_total, Metric Type: counter
+Metric : node_network_transmit_packets_total{device="awdl0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="awdl0"}
+Metric : node_network_transmit_packets_total{device="bridge0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="bridge0"}
+Metric : node_network_transmit_packets_total{device="en0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="en0"}
+Metric : node_network_transmit_packets_total{device="en1"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="en1"}
+Metric : node_network_transmit_packets_total{device="en2"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="en2"}
+Metric : node_network_transmit_packets_total{device="gif0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="gif0"}
+Metric : node_network_transmit_packets_total{device="llw0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="llw0"}
+Metric : node_network_transmit_packets_total{device="lo0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="lo0"}
+Metric : node_network_transmit_packets_total{device="p2p0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="p2p0"}
+Metric : node_network_transmit_packets_total{device="stf0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="stf0"}
+Metric : node_network_transmit_packets_total{device="utun0"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="utun0"}
+Metric : node_network_transmit_packets_total{device="utun1"}, Metric Labels: {__name__="node_network_transmit_packets_total", device="utun1"}
+Metric Name: node_scrape_collector_duration_seconds, Metric Type: gauge
+Metric : node_scrape_collector_duration_seconds{collector="boottime"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="boottime"}
+Metric : node_scrape_collector_duration_seconds{collector="cpu"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="cpu"}
+Metric : node_scrape_collector_duration_seconds{collector="diskstats"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="diskstats"}
+Metric : node_scrape_collector_duration_seconds{collector="filesystem"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="filesystem"}
+Metric : node_scrape_collector_duration_seconds{collector="loadavg"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="loadavg"}
+Metric : node_scrape_collector_duration_seconds{collector="meminfo"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="meminfo"}
+Metric : node_scrape_collector_duration_seconds{collector="netdev"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="netdev"}
+Metric : node_scrape_collector_duration_seconds{collector="textfile"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="textfile"}
+Metric : node_scrape_collector_duration_seconds{collector="time"}, Metric Labels: {__name__="node_scrape_collector_duration_seconds", collector="time"}
+Metric Name: node_scrape_collector_success, Metric Type: gauge
+Metric : node_scrape_collector_success{collector="boottime"}, Metric Labels: {__name__="node_scrape_collector_success", collector="boottime"}
+Metric : node_scrape_collector_success{collector="cpu"}, Metric Labels: {__name__="node_scrape_collector_success", collector="cpu"}
+Metric : node_scrape_collector_success{collector="diskstats"}, Metric Labels: {__name__="node_scrape_collector_success", collector="diskstats"}
+Metric : node_scrape_collector_success{collector="filesystem"}, Metric Labels: {__name__="node_scrape_collector_success", collector="filesystem"}
+Metric : node_scrape_collector_success{collector="loadavg"}, Metric Labels: {__name__="node_scrape_collector_success", collector="loadavg"}
+Metric : node_scrape_collector_success{collector="meminfo"}, Metric Labels: {__name__="node_scrape_collector_success", collector="meminfo"}
+Metric : node_scrape_collector_success{collector="netdev"}, Metric Labels: {__name__="node_scrape_collector_success", collector="netdev"}
+Metric : node_scrape_collector_success{collector="textfile"}, Metric Labels: {__name__="node_scrape_collector_success", collector="textfile"}
+Metric : node_scrape_collector_success{collector="time"}, Metric Labels: {__name__="node_scrape_collector_success", collector="time"}
+Metric Name: node_textfile_scrape_error, Metric Type: gauge
+Metric : node_textfile_scrape_error, Metric Labels: {__name__="node_textfile_scrape_error"}
+Metric Name: node_time_seconds, Metric Type: gauge
+Metric : node_time_seconds, Metric Labels: {__name__="node_time_seconds"}
+Metric Name: promhttp_metric_handler_requests_in_flight, Metric Type: gauge
+Metric : promhttp_metric_handler_requests_in_flight, Metric Labels: {__name__="promhttp_metric_handler_requests_in_flight"}
+Metric Name: promhttp_metric_handler_requests_total, Metric Type: counter
+Metric : promhttp_metric_handler_requests_total{code="200"}, Metric Labels: {__name__="promhttp_metric_handler_requests_total", code="200"}
+Metric : promhttp_metric_handler_requests_total{code="500"}, Metric Labels: {__name__="promhttp_metric_handler_requests_total", code="500"}
+Metric : promhttp_metric_handler_requests_total{code="503"}, Metric Labels: {__name__="promhttp_metric_handler_requests_total", code="503"}
+```
+
+I also wrote code to get the unit of the metric, but in the input that I had,
+I guess there's no metric, and hence no output regarding units. Anyways, that
+doesn't matter I guess. I'm just going to see how to store only the metric
+name, metric type and then all the metric label names, excluding `__name__`,
+which common for all and stores the metric name in the label value, and I don't
+know why 🙈
+
+
