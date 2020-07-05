@@ -231,3 +231,49 @@ Metric Name: node_time_seconds, Metric Type: gauge
 Metric Name: promhttp_metric_handler_requests_in_flight, Metric Type: gauge
 Metric Name: promhttp_metric_handler_requests_total, Metric Type: counter
 ```
+
+Next is - find differences between the old and new metrics. We also have to
+checkout labels next.
+
+Something to note is - my aim is to notice breaking changes, which means
+concentrating more on the metrics that are present in the old version but
+missing in the new version - because they are missing, or just renamed.
+Other breaking changes are - changing the type of the metrics. And then
+of course there's labels. Now the thing with the word "diff" or "difference"
+is that, it's also meant to show what's present in the new version but not
+present in the old. For me these are possibly new features, or just some
+metrics or labels renamed or whose type have been changed.
+
+I gotta think what I need to provide. For now I think I'll go with the main
+aim of this tool, and concentrate only on the breaking changes difference, not
+worrying too much on the name of the tool :)
+
+Also, once a person finds out what's there in old version but not in new
+version, they will check the new version to see if there are new stuff that
+replace the old stuff or something. Even if the tool shows the new stuff,
+it's upto the user to check the help text of the metric and the exporter's
+change log to understand what metric gives what and how the naming has changed
+or if the metric has been removed and stuff.
+
+The one downside to this tool is that, it's going to show you all the breaking
+changes based on all the old and new metrics. But it's very possible that you
+are not using all the metrics of the exporter, for example in your grafana
+dashboards. In which case, you just need to worry about metrics that you are
+using, and forget about the others.
+
+So, the ideal steps would be to
+* First get metric names from the old metrics, with or without the tool. I'll
+see how the tool can help :)
+* See what all metrics you use in your grafana dashboard or any place where the
+metrics are referred to
+* With the tool, find out what old metrics are broken (name, type, label name,
+label type) and focus only on the metrics you use and chuck the others
+* Then you can move on to see how to fix the broken metrics
+    * Checking changelogs / docs of the exporters to see what happened to
+    these broken metrics
+* For fixing the usage, you might have to use another tool, and the input to
+that tool will have to be manually created, and may be the fixing itself can
+be done manually if you don't have automation. For this step, I'm planning to
+create a separate tool to fix grafana dashboard JSONs given input on what should
+be changed to what.
+
