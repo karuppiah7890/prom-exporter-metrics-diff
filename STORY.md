@@ -915,4 +915,73 @@ name, metric type and then all the metric label names, excluding `__name__`,
 which common for all and stores the metric name in the label value, and I don't
 know why 🙈
 
+---
 
+I have now written code to store the metrics in a map data structure, with
+key as the metric name and value as the whole metric information. I figured
+this might make it easy to search the metric and also do diff operation easily
+
+I finally did the diff operation too, to show the metrics present in old
+metrics but not in the new metrics - the breaking changes.
+
+```bash
+$ ./prom-exporter-metrics-diff sample/0.15.0.metrics sample/0.18.0.metrics 
+Metrics Diff: 
+
+http_request_size_bytes
+node_memory_wired_bytes_total
+node_memory_free_bytes_total
+node_filesystem_size
+node_memory_active_bytes_total
+node_memory_swapped_in_pages_total
+http_response_size_bytes
+node_filesystem_free
+node_network_receive_bytes
+node_network_transmit_errs
+http_request_size_bytes_sum
+node_cpu
+node_memory_swapped_out_pages_total
+node_network_receive_packets
+http_request_duration_microseconds
+http_request_size_bytes_count
+node_network_receive_errs
+node_network_transmit_bytes
+http_response_size_bytes_count
+http_request_duration_microseconds_sum
+http_requests_total
+node_disk_write_seconds_total
+node_disk_read_seconds_total
+node_memory_inactive_bytes_total
+node_network_transmit_multicast
+node_filesystem_avail
+http_request_duration_microseconds_count
+node_network_receive_multicast
+node_network_transmit_packets
+node_memory_bytes_total
+http_response_size_bytes_sum
+node_time
+```
+
+Notice the `http_request_duration_microseconds_sum` and
+`http_request_duration_microseconds_count` - these are actually part of the
+`http_request_duration_microseconds` metric and it's a summary type metric and
+hence it has the `sum` and `count` thingy I guess. Anyways, I ignored it for
+now
+
+But the above list is a good start for someone to do some comparison. Next
+thing for me to do is - if the metric names are exactly the same, check if
+there are differences in the label names. I'm NOT checking the label types
+for now.
+
+After that, I'll have to see if I can help the user to find out what's the
+closest metric out there in the new metrics that "could possibly" be the newer
+version of the old metric. How I'm going to do that is like this -
+* If an old metric and new metric, each with different names, have the same
+set of labels, it's POSSIBLE that they are the same. Just POSSIBLE. So I can
+do that as a suggestion for the user, so that they can then check manually
+* If an old metric name and new metric name have a lot of similarity,
+for example `node_memory_wired_bytes` and `node_memory_wired_bytes_total`,
+then it's POSSIBLE that they are related. Again, just POSSIBLE. I can throw
+that suggestion in
+
+That's all I can think of as of now, in terms of giving suggestions
