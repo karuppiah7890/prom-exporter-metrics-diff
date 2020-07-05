@@ -99,11 +99,6 @@ func parseMetrics(parser textparse.Parser) Metrics {
 			labelNames, metricName := extractLabelsAndMetricName(labels)
 			metrics.SetMetricLabels(metricName, labelNames)
 		}
-
-		if entry == textparse.EntryUnit {
-			metricName, metricUnit := parser.Unit()
-			fmt.Printf("Metric Name: %s, Metric Unit: %s\n", metricName, metricUnit)
-		}
 	}
 
 	return metrics
