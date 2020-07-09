@@ -34,7 +34,7 @@ func main() {
 	oldMetrics := parseMetrics(oldMetricsParser)
 	newMetrics := parseMetrics(newMetricsParser)
 
-	metricsDiff := oldMetrics.Diff(newMetrics)
+	metricsDiff, _ := oldMetrics.Diff(newMetrics)
 
 	fmt.Printf("Metrics Diff: \n\n")
 	for _, metric := range metricsDiff {
@@ -82,10 +82,18 @@ func (metrics Metrics) AddMetric(metricName string) {
 // two sets of metrics in terms of metric names
 type MetricNameDiff []string
 
+// MetricLabelDiff represents the difference between
+// two sets of metrics in terms of metric labels,
+// for the same metric name
+type MetricLabelDiff struct {
+	MetricName string
+	LabelDiff  []string
+}
+
 // Diff finds the difference between the two metrics.
 // What this means is that, what metric is present in
 // metrics but not present in anotherMetrics
-func (metrics Metrics) Diff(anotherMetrics Metrics) MetricNameDiff {
+func (metrics Metrics) Diff(anotherMetrics Metrics) (MetricNameDiff, MetricLabelDiff) {
 	diff := []string{}
 
 	for metricName := range metrics {
@@ -95,7 +103,7 @@ func (metrics Metrics) Diff(anotherMetrics Metrics) MetricNameDiff {
 		}
 	}
 
-	return MetricNameDiff(diff)
+	return MetricNameDiff(diff), MetricLabelDiff{}
 }
 
 func parseMetrics(parser textparse.Parser) Metrics {

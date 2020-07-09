@@ -185,19 +185,22 @@ func TestMetricsDifference(t *testing.T) {
 	t.Run("NoDiff", func(t *testing.T) {
 		metrics := Metrics{
 			"oneMetric": &Metric{
-				Name: "oneMetric",
+				Name:   "oneMetric",
+				Labels: []string{"oneLabel"},
 			},
 		}
 
 		anotherMetrics := Metrics{
 			"oneMetric": &Metric{
-				Name: "oneMetric",
+				Name:   "oneMetric",
+				Labels: []string{"oneLabel"},
 			},
 		}
 
-		metricNamesDiff := metrics.Diff(anotherMetrics)
+		metricNamesDiff, metricLabelDiff := metrics.Diff(anotherMetrics)
 
 		assert.Equal(t, MetricNameDiff{}, metricNamesDiff)
+		assert.Equal(t, MetricLabelDiff{}, metricLabelDiff)
 	})
 
 	t.Run("OneMetricNameInDiff", func(t *testing.T) {
@@ -216,7 +219,7 @@ func TestMetricsDifference(t *testing.T) {
 			},
 		}
 
-		metricNamesDiff := metrics.Diff(anotherMetrics)
+		metricNamesDiff, _ := metrics.Diff(anotherMetrics)
 
 		assert.Equal(t, MetricNameDiff{"anotherMetric"}, metricNamesDiff)
 	})
