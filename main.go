@@ -83,17 +83,20 @@ func (metrics Metrics) AddMetric(metricName string) {
 type MetricNameDiff []string
 
 // MetricLabelDiff represents the difference between
-// two sets of metrics in terms of metric labels,
+// two metrics in terms of metric labels (label names),
 // for the same metric name
 type MetricLabelDiff struct {
 	MetricName string
 	LabelDiff  []string
 }
 
+// MetricLabelDiffs represents a list of MetricLabelDiff
+type MetricLabelDiffs []MetricLabelDiff
+
 // Diff finds the difference between the two metrics.
 // What this means is that, what metric is present in
 // metrics but not present in anotherMetrics
-func (metrics Metrics) Diff(anotherMetrics Metrics) (MetricNameDiff, MetricLabelDiff) {
+func (metrics Metrics) Diff(anotherMetrics Metrics) (MetricNameDiff, MetricLabelDiffs) {
 	diff := []string{}
 
 	for metricName := range metrics {
@@ -103,7 +106,7 @@ func (metrics Metrics) Diff(anotherMetrics Metrics) (MetricNameDiff, MetricLabel
 		}
 	}
 
-	return MetricNameDiff(diff), MetricLabelDiff{}
+	return MetricNameDiff(diff), MetricLabelDiffs{}
 }
 
 func parseMetrics(parser textparse.Parser) Metrics {
