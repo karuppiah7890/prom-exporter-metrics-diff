@@ -197,7 +197,7 @@ func TestMetricsDifference(t *testing.T) {
 
 		metricNamesDiff := metrics.Diff(anotherMetrics)
 
-		assert.Equal(t, []string{}, metricNamesDiff)
+		assert.Equal(t, MetricNameDiff{}, metricNamesDiff)
 	})
 
 	t.Run("OneMetricNameInDiff", func(t *testing.T) {
@@ -218,6 +218,6 @@ func TestMetricsDifference(t *testing.T) {
 
 		metricNamesDiff := metrics.Diff(anotherMetrics)
 
-		assert.Equal(t, []string{"anotherMetric"}, metricNamesDiff)
+		assert.Equal(t, MetricNameDiff{"anotherMetric"}, metricNamesDiff)
 	})
 }

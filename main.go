@@ -78,10 +78,14 @@ func (metrics Metrics) AddMetric(metricName string) {
 	}
 }
 
+// MetricNameDiff represents the difference between
+// two sets of metrics in terms of metric names
+type MetricNameDiff []string
+
 // Diff finds the difference between the two metrics.
 // What this means is that, what metric is present in
 // metrics but not present in anotherMetrics
-func (metrics Metrics) Diff(anotherMetrics Metrics) []string {
+func (metrics Metrics) Diff(anotherMetrics Metrics) MetricNameDiff {
 	diff := []string{}
 
 	for metricName := range metrics {
@@ -91,7 +95,7 @@ func (metrics Metrics) Diff(anotherMetrics Metrics) []string {
 		}
 	}
 
-	return diff
+	return MetricNameDiff(diff)
 }
 
 func parseMetrics(parser textparse.Parser) Metrics {
