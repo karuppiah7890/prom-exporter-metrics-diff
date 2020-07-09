@@ -34,11 +34,16 @@ func main() {
 	oldMetrics := parseMetrics(oldMetricsParser)
 	newMetrics := parseMetrics(newMetricsParser)
 
-	metricsDiff, _ := oldMetrics.Diff(newMetrics)
+	metricNamesDiff, metricLabelDiffs := oldMetrics.Diff(newMetrics)
 
-	fmt.Printf("Metrics Diff: \n\n")
-	for _, metric := range metricsDiff {
+	fmt.Printf("Metric Names Diff: \n\n")
+	for _, metric := range metricNamesDiff {
 		fmt.Println(metric)
+	}
+
+	fmt.Printf("Metric Labels Diff: \n\n")
+	for _, metricLabelDiff := range metricLabelDiffs {
+		fmt.Println(metricLabelDiff)
 	}
 }
 
