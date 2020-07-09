@@ -223,4 +223,49 @@ func TestMetricsDifference(t *testing.T) {
 
 		assert.Equal(t, MetricNameDiff{"anotherMetric"}, metricNamesDiff)
 	})
+
+	t.Run("OneMetricLabelNameInDiff", func(t *testing.T) {
+		metrics := Metrics{
+			"oneMetric": &Metric{
+				Name:   "oneMetric",
+				Labels: []string{"oneLabel", "anotherLabel"},
+			},
+		}
+
+		anotherMetrics := Metrics{
+			"oneMetric": &Metric{
+				Name:   "oneMetric",
+				Labels: []string{"oneLabel"},
+			},
+		}
+
+		expectedMetricLabelDiffs := MetricLabelDiffs{
+			{
+				MetricName: "oneMetric",
+				LabelDiff:  []string{"anotherLabel"},
+			},
+		}
+
+		metricNamesDiff, metricLabelDiffs := metrics.Diff(anotherMetrics)
+
+		assert.Equal(t, MetricNameDiff{}, metricNamesDiff)
+		assert.Equal(t, expectedMetricLabelDiffs, metricLabelDiffs)
+
+	})
+}
+
+func TestStringArrayDiff(t *testing.T) {
+	t.Run("no difference", func(t *testing.T) {
+		assert.Equal(t, []string{}, stringArrayDiff([]string{}, []string{}))
+	})
+
+	t.Run("one string difference", func(t *testing.T) {
+		assert.Equal(t, []string{"oneLabel"}, stringArrayDiff([]string{"oneLabel"}, []string{}))
+	})
+
+	t.Run("two string difference", func(t *testing.T) {
+		assert.Equal(t, []string{"oneLabel", "somethingElse"},
+			stringArrayDiff([]string{"oneLabel", "somethingElse"},
+				[]string{"anotherLabel", "totallyDifferent"}))
+	})
 }

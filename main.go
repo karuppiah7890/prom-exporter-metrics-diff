@@ -97,16 +97,48 @@ type MetricLabelDiffs []MetricLabelDiff
 // What this means is that, what metric is present in
 // metrics but not present in anotherMetrics
 func (metrics Metrics) Diff(anotherMetrics Metrics) (MetricNameDiff, MetricLabelDiffs) {
+	namesDiff := []string{}
+	labelsDiff := MetricLabelDiffs{}
+
+	for metricName, metric := range metrics {
+		anotherMetric, metricExists := anotherMetrics[metricName]
+		if !metricExists {
+			namesDiff = append(namesDiff, metricName)
+			continue
+		}
+
+		labelNamesDiff := stringArrayDiff(metric.Labels, anotherMetric.Labels)
+		if len(labelNamesDiff) > 0 {
+			metricLabelsDiff := MetricLabelDiff{
+				MetricName: metricName,
+				LabelDiff:  labelNamesDiff,
+			}
+			labelsDiff = append(labelsDiff, metricLabelsDiff)
+		}
+
+	}
+
+	return MetricNameDiff(namesDiff), labelsDiff
+}
+
+func stringArrayDiff(labels []string, anotherLabelsList []string) []string {
 	diff := []string{}
 
-	for metricName := range metrics {
-		_, metricExists := anotherMetrics[metricName]
-		if !metricExists {
-			diff = append(diff, metricName)
+	for _, label := range labels {
+		found := false
+		for _, anotherLabel := range anotherLabelsList {
+			if label == anotherLabel {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			diff = append(diff, label)
 		}
 	}
 
-	return MetricNameDiff(diff), MetricLabelDiffs{}
+	return diff
 }
 
 func parseMetrics(parser textparse.Parser) Metrics {
